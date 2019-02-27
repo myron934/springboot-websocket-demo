@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty scope="context" name="springAppName"
+                    source="spring.application.name"/>
+    <!-- 文件输出格式 -->
+    <property name="PATTERN"
+              value="%-12(%d{yyyy-MM-dd HH:mm:ss.SSS}) %highlight(%-5level) %thread %logger{50} [%L] -| %highlight(%msg%n)"/>
+    <!-- dev文件路径 -->
+    <property name="DEV_FILE_PATH" value="d:/logs/${springAppName}"/>
+    <property name="TEST_FILE_PATH" value="./logs/${springAppName}"/>
+    <property name="PRO_FILE_PATH" value="/home/eplan/var/log/${springAppName}"/>
+
+    <!-- 开发环境 -->
+    <springProfile name="dev">
+        <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>${PATTERN}</pattern>
+            </layout>
+            <!--<encoder class="net.logstash.logback.encoder.LogstashEncoder"/>-->
+        </appender>
+        <!-- 每天产生一个文件 -->
+        <appender name="all"
+                  class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <!-- 文件路径 -->
+            <file>${DEV_FILE_PATH}/all.log</file>
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- 文件名称 -->
+                <fileNamePattern>${DEV_FILE_PATH}/all.log.%d{yyyy-MM-dd}
+                </fileNamePattern>
+                <!-- 文件最大保存历史数量 -->
+                <MaxHistory>5</MaxHistory>
+            </rollingPolicy>
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>${PATTERN}</pattern>
+            </layout>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+
+        <!-- 每天产生一个文件 -->
+        <appender name="sql" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <!-- 文件路径 -->
+            <file>${DEV_FILE_PATH}/sql.log</file>
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- 文件名称 -->
+                <fileNamePattern>${DEV_FILE_PATH}/sql.log.%d{yyyy-MM-dd}
+                </fileNamePattern>
+                <!-- 文件最大保存历史数量 -->
+                <MaxHistory>5</MaxHistory>
+            </rollingPolicy>
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>${PATTERN}</pattern>
+            </layout>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+
+        <!-- 每天产生一个文件 -->
+        <appender name="request" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <!-- 文件路径 -->
+            <file>${DEV_FILE_PATH}/request.log</file>
+            <rollingPolicy
+                    class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- 文件名称 -->
+                <fileNamePattern>${DEV_FILE_PATH}/request.log.%d{yyyy-MM-dd}
+                </fileNamePattern>
+                <!-- 文件最大保存历史数量 -->
+                <MaxHistory>5</MaxHistory>
+            </rollingPolicy>
+            <layout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>${PATTERN}</pattern>
+            </layout>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        </appender>
+
+        <root level="info">
+            <appender-ref ref="all"/>
+            <appender-ref ref="console"/>
+        </root>
+
+        <!--禁止swagger的bug导致的报错信息-->
+        <logger name="io.swagger.models.parameters" level="error"
+                additivity="false">
+            <appender-ref ref="console"/>
+        </logger>
+    </springProfile>
+
+
+</configuration>
