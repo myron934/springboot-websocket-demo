@@ -59,7 +59,7 @@ public class HelloEndpoint {
         }
         endPointMap.put(userId, this);     //加入set中
         addOnlineCount();           //在线数加1
-        logger.info("有新连接加入！当前在线人数为" + getOnlineCount());
+        logger.warn("有新连接加入！当前在线人数为" + getOnlineCount());
         sendMessageToAll(chatId, "[系统消息]: " + "欢迎" + userId + "加入聊天");
     }
 
@@ -81,7 +81,7 @@ public class HelloEndpoint {
             }
         }
         subOnlineCount();           //在线数减1
-        logger.info("有一连接关闭！当前在线人数为" + getOnlineCount());
+        logger.warn("有一连接关闭！当前在线人数为" + getOnlineCount());
         sendMessageToAll(chatId, "[系统消息]: " + userId + "退出了群聊");
     }
 
@@ -103,10 +103,13 @@ public class HelloEndpoint {
         //群发消息
         endPointMap.forEach((k, v) -> {
             try {
-                if (userId.equals(v.userId)) {
-                    v.session.getBasicRemote().sendText("<b style=\"color:#D00\">[" + "我" + "]</b>: " + message);
-                } else {
-                    v.session.getBasicRemote().sendText("<b style=\"color:#0DD\">[" + userId + "]</b>: " + message);
+                synchronized (v.session) {
+                    if (userId.equals(v.userId)) {
+                        v.session.getBasicRemote().sendText("<b style=\"color:#D00\">[" + "我" + "]</b>: " + message);
+                    } else {
+                        v.session.getBasicRemote().sendText("<b style=\"color:#0DD\">[" + userId + "]</b>: " + message);
+                    }
+
                 }
             } catch (IOException e) {
                 logger.info("send message to{} failed", k, e);
@@ -125,7 +128,6 @@ public class HelloEndpoint {
 
     public void sendMessage(String message) throws IOException {
         session.getBasicRemote().sendText(message);
-        //this.session.getAsyncRemote().sendText(message);
     }
 
     /**
@@ -139,7 +141,11 @@ public class HelloEndpoint {
         endPointMap.forEach((k, v) -> {
             try {
                 if (v.session.isOpen()) {
-                    v.session.getBasicRemote().sendText(message);
+                    synchronized (v.session) {
+                        if (v.session.isOpen()) {
+                            v.session.getBasicRemote().sendText(message);
+                        }
+                    }
                 }
             } catch (IOException e) {
                 logger.info("send message to{} failed", k, e);
